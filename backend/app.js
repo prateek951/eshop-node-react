@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
-const { MongoClient } = require('mongodb');
+const DATABASE = require('./db');
 const productRoutes = require('./routes/products');
 const authRoutes = require('./routes/auth');
 const app = express();
@@ -23,6 +23,12 @@ app.use((req, res, next) => {
 app.use('/products', productRoutes);
 app.use('/', authRoutes);
 
-
 const port = process.env.PORT || 1212;
-app.listen(port,() => console.log(`Server is running on the port: ${port}`));
+
+DATABASE.INITIALISE_DATABASE((err,db) => {
+  if(err) {
+    console.log(err);
+  }else {
+    app.listen(port,() => console.log(`Server is running on the port: ${port}`));
+  }
+})
