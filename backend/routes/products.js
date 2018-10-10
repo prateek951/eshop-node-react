@@ -1,5 +1,6 @@
 const Router = require("express").Router;
-const mongodb = require('mongodb');
+const mongodb = require("mongodb");
+const HTTP_STATUS_CODES = require('http-status-codes');
 // For storing images we use Decimal128
 const { MongoClient, Decimal128 } = mongodb;
 const router = Router();
@@ -57,16 +58,49 @@ const products = [
 router.get("/", (req, res, next) => {
   // Return a list of dummy products
   // Later, this data will be fetched from MongoDB
-  const queryPage = req.query.page;
-  const pageSize = 5;
-  let resultProducts = [...products];
-  if (queryPage) {
-    resultProducts = products.slice(
-      (queryPage - 1) * pageSize,
-      queryPage * pageSize
-    );
-  }
-  res.json(resultProducts);
+  // const queryPage = req.query.page;
+  // const pageSize = 5;
+  // let resultProducts = [...products];
+  // if (queryPage) {
+  //   resultProducts = products.slice(
+  //     (queryPage - 1) * pageSize,
+  //     queryPage * pageSize
+  //   );
+  // }
+  MongoClient.connect(
+    "mongodb://localhost:27017/eshop",
+    {
+      useNewUrlParser: true
+    }
+  )
+    .then(client => {
+      const products = [];
+      console.log("Connected !");
+      client
+        .db()
+        .collection("products")
+        .find({}).forEach(product => {
+          // console.log(product);
+          product.price = product.price.toString();
+          products.push(product);
+        })
+        .then(result => {
+          console.log(result);
+          client.close();
+          res.status(HTTP_STATUS_CODES.OK).json(products);
+        })
+        .catch(err => {
+          console.log(err);
+          client.close();
+          res
+            .status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+            .json({ message: "An error occured" });
+        });
+    })
+    .catch(err => {
+      console.log(err)
+      res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({message:"An error occured"});
+    });
 });
 
 // Get single product
@@ -92,18 +126,26 @@ router.post("", (req, res, next) => {
   )
     .then(client => {
       console.log("Connected !");
-      client.db().collection('products').insertOne(newProduct)
-      .then(result => {
-        console.log(result);
-        client.close();
-      }).catch(err => {
-        console.log(err);
-        client.close();
-      });
+      client
+        .db()
+        .collection("products")
+        .insertOne(newProduct)
+        .then(result => {
+          console.log(result);
+          client.close();
+          res
+            .status(HTTP_STATUS_CODES.OK)
+            .json({ message: "Product added", productId: result.insertedId });
+        })
+        .catch(err => {
+          console.log(err);
+          client.close();
+          res
+            .status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+            .json({ message: "An error occured", productId: "DUMMY" });
+        });
     })
     .catch(err => console.log(err));
-
-  res.status(201).json({ message: "Product added", productId: "DUMMY" });
 });
 
 // Edit existing product
@@ -116,13 +158,13 @@ router.patch("/:id", (req, res, next) => {
     image: req.body.image
   };
   console.log(updatedProduct);
-  res.status(200).json({ message: "Product updated", productId: "DUMMY" });
+  res.status(HTTP_STATUS_CODES.CREATED).json({ message: "Product updated", productId: "DUMMY" });
 });
 
 // Delete a product
 // Requires logged in user
 router.delete("/:id", (req, res, next) => {
-  res.status(200).json({ message: "Product deleted" });
+  res.status(HTTP_STATUS_CODES.OK).json({ message: "Product deleted" });
 });
 
 module.exports = router;
