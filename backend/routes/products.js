@@ -138,17 +138,31 @@ router.patch("/:id", (req, res, next) => {
   const updatedProduct = {
     name: req.body.name,
     description: req.body.description,
-    price: parseFloat(req.body.price), // store this as 128bit decimal in MongoDB
+    price: Decimal128.fromString(req.body.price.toString()), // store this as 128bit decimal in MongoDB
     image: req.body.image
   };
-  console.log(updatedProduct);
-  res.status(HTTP_STATUS_CODES.CREATED).json({ message: "Product updated", productId: "DUMMY" });
+  const { id } = req.params;
+  db.GET_DATABASE().db().collection('posts')
+  .updateOne({_id : new ObjectId(id)},{$set: updatedProduct}).then(() => {
+    res.status(HTTP_STATUS_CODES.CREATED).json({ message: "Product updated", productId: id });
+  }).catch(err => {
+    console.log(err);
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: 'An error occured'});
+  })
 });
 
 // Delete a product
 // Requires logged in user
-router.delete("/:id", (req, res, next) => {
-  res.status(HTTP_STATUS_CODES.OK).json({ message: "Product deleted" });
+router.delete('/:id',(req, res, next) => {
+  const { id } = req.params;
+  db.GET_DATABASE().db().collection('products')
+  .deleteOne({_id : new ObjectId(id)})
+  .then(() => {
+    res.status(HTTP_STATUS_CODES.OK).json({message:'Product deleted'});
+  }).catch(err => {
+    console.log(err);
+    res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({message: 'An error occured'});
+  });
 });
 
 module.exports = router;
