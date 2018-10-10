@@ -3,7 +3,7 @@ const mongodb = require("mongodb");
 const HTTP_STATUS_CODES = require('http-status-codes');
 // For storing images we use Decimal128
 const db = require('../db');
-const { Decimal128 } = mongodb;
+const { Decimal128, ObjectId } = mongodb;
 const router = Router();
 
 // const products = [
@@ -88,10 +88,24 @@ router.get("/", (req, res, next) => {
     })
 
 // Get single product
-router.get("/:id", (req, res, next) => {
-  const product = products.find(p => p._id === req.params.id);
-  res.json(product);
+router.get('/:id',(req, res, next) => {
+    // const product = products.find(p => p._id === req.params.id);
+    // res.json(product);
+    const { id } = req.params;
+    db.GET_DATABASE().db().collection('products')
+    .findOne({_id : new ObjectId(id) })
+    .then(product => {
+      product.price = product.price.toString();
+      if(product) {
+        res.status(HTTP_STATUS_CODES.OK).json(product);
+      }
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({message:'An error occured'});
+    });
 });
+
 
 // Add new product
 // Requires logged in user
