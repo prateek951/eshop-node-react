@@ -1,11 +1,9 @@
-const path = require('path');
-
 const express = require('express');
+const path = require('path');
 const bodyParser = require('body-parser');
-
+const { MongoClient } = require('mongodb');
 const productRoutes = require('./routes/products');
 const authRoutes = require('./routes/auth');
-
 const app = express();
 
 app.use(bodyParser.json());
@@ -22,7 +20,17 @@ app.use((req, res, next) => {
   next();
 });
 
+
 app.use('/products', productRoutes);
 app.use('/', authRoutes);
 
-app.listen(3100);
+MongoClient.connect('mongodb://localhost:27017/eshop',{
+  useNewUrlParser: true
+}).then(client=> {
+  console.log('Connected !');
+  client.close();
+}).catch(err => console.log(err));
+
+
+const port = process.env.PORT || 1212;
+app.listen(port,() => console.log(`Server is running on the port: ${port}`));
