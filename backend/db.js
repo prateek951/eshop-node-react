@@ -12,7 +12,7 @@ const INITIALISE_DATABASE = cb => {
     MongoClient.connect(MONGO_URL,{ 
         useNewUrlParser: true
     }).then(client => {
-        _db = client.db();
+        _db = client;
         cb(null,_db);
     }).catch(err => {
         cb(err);
