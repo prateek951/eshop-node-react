@@ -118,6 +118,7 @@ class App extends Component {
 
     return (
       <div className="App">
+        
         <Modal
           open={!!this.state.error}
           title="An Error Occurred"
