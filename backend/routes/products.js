@@ -142,7 +142,7 @@ router.patch("/:id", (req, res, next) => {
     image: req.body.image
   };
   const { id } = req.params;
-  db.GET_DATABASE().db().collection('posts')
+  db.GET_DATABASE().db().collection('products')
   .updateOne({_id : new ObjectId(id)},{$set: updatedProduct}).then(() => {
     res.status(HTTP_STATUS_CODES.CREATED).json({ message: "Product updated", productId: id });
   }).catch(err => {
