@@ -20,16 +20,8 @@ app.use((req, res, next) => {
   next();
 });
 
-
 app.use('/products', productRoutes);
 app.use('/', authRoutes);
-
-MongoClient.connect('mongodb://localhost:27017/eshop',{
-  useNewUrlParser: true
-}).then(client=> {
-  console.log('Connected !');
-  client.close();
-}).catch(err => console.log(err));
 
 
 const port = process.env.PORT || 1212;
