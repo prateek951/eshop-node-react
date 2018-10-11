@@ -23,7 +23,7 @@ app.use((req, res, next) => {
 app.use('/products', productRoutes);
 app.use('/', authRoutes);
 
-const port = process.env.PORT || 1212;
+const port = process.env.PORT || 3100;
 
 DATABASE.INITIALISE_DATABASE((err,db) => {
   if(err) {
