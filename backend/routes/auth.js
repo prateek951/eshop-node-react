@@ -22,6 +22,9 @@ router.post('/login', (req, res, next) => {
     .json({ message: 'Authentication failed, invalid username or password.' });
 });
 
+// Adding an index to make the email unique
+// db.users.createIndex({email:1},{unique: true})
+
 router.post('/signup', (req, res, next) => {
   const email = req.body.email;
   const pw = req.body.password;
