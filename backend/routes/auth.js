@@ -1,9 +1,8 @@
 const Router = require("express").Router;
 const jwt = require("jsonwebtoken");
+const HTTP_STATUS_CODES = require('http-status-codes');
 const bcrypt = require("bcryptjs");
-
 const db = require("../db");
-
 const router = Router();
 
 const createToken = () => {
@@ -28,12 +27,12 @@ router.post("/login", (req, res, next) => {
       }
       const token = createToken();
       res
-        .status(200)
+        .status(HTTP_STATUS_CODES.OK)
         .json({ message: "Authentication succeeded", token: token });
     })
     .catch(err => {
       console.log(err);
-      res.status(401).json({
+      res.status(HTTP_STATUS_CODES.UNAUTHORIZED).json({
         message: "Authentication failed, invalid username or password"
       });
     });
@@ -61,16 +60,16 @@ router.post("/signup", (req, res, next) => {
         .then(result => {
           console.log(result);
           const token = createToken();
-          res.status(201).json({ token: token, user: { email: email } });
+          res.status(HTTP_STATUS_CODES.CREATED).json({ token: token, user: { email: email } });
         })
         .catch(err => {
           console.log(err);
-          res.status(500).json({ message: "Creating the user failed." });
+          res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Creating the user failed." });
         });
     })
     .catch(err => {
       console.log(err);
-      res.status(500).json({ message: "Creating the user failed." });
+      res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: "Creating the user failed." });
     });
   // Add user to database
 });
